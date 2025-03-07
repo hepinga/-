@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>赛博贪吃蛇</title>
+    <title>赛博打工蛇</title>
     <style>
         body {
             margin: 0;
@@ -63,6 +63,22 @@
             z-index: 1;
         }
 
+        .bonus-food {
+            position: absolute;
+            width: 20px;
+            height: 20px;
+            background-color: #ff0000;
+            box-shadow: 0 0 15px #ff0000;
+            border-radius: 4px;
+            z-index: 1;
+            animation: pulse 0.8s infinite alternate;
+        }
+
+        @keyframes pulse {
+            from { transform: scale(1); box-shadow: 0 0 15px #ff0000; }
+            to { transform: scale(1.2); box-shadow: 0 0 25px #ff0000; }
+        }
+
         .score-container {
             position: absolute;
             top: 10px;
@@ -70,6 +86,89 @@
             font-size: 24px;
             text-shadow: 0 0 10px #0df;
             z-index: 10;
+        }
+
+        .salary-container {
+            position: absolute;
+            top: 40px;
+            left: 10px;
+            font-size: 24px;
+            text-shadow: 0 0 10px #ff0080;
+            z-index: 10;
+            color: #ff0080;
+        }
+        
+        .status-container {
+            position: absolute;
+            top: 70px;
+            left: 10px;
+            font-size: 18px;
+            text-shadow: 0 0 10px #0df;
+            z-index: 10;
+            color: #0df;
+        }
+
+        .message {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 32px;
+            color: #ff00ff;
+            text-shadow: 0 0 15px #ff00ff;
+            z-index: 60;
+            text-align: center;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+        
+        .event-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.7);
+            z-index: 90;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            display: none;
+        }
+        
+        .event-overlay h3 {
+            color: #ff0080;
+            font-size: 36px;
+            text-shadow: 0 0 15px #ff0080;
+            margin-bottom: 20px;
+        }
+        
+        .event-overlay p {
+            color: #0df;
+            font-size: 20px;
+            text-shadow: 0 0 10px #0df;
+            margin-bottom: 30px;
+            text-align: center;
+            max-width: 80%;
+            white-space: pre-line;
+        }
+        
+        .event-overlay button {
+            background-color: transparent;
+            border: 2px solid #0df;
+            color: #0df;
+            padding: 10px 20px;
+            font-size: 18px;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-shadow: 0 0 10px #0df;
+            box-shadow: 0 0 10px #0df;
+        }
+        
+        .event-overlay button:hover {
+            background-color: #0df;
+            color: #000;
         }
 
         .grid-line {
@@ -113,7 +212,7 @@
         .game-over p {
             color: #0df;
             font-size: 24px;
-            margin-bottom: 30px;
+            margin-bottom: 10px;
             text-shadow: 0 0 10px #0df;
         }
 
@@ -127,6 +226,7 @@
             transition: all 0.3s;
             text-shadow: 0 0 10px #0df;
             box-shadow: 0 0 10px #0df;
+            margin-top: 20px;
         }
 
         .game-over button:hover {
@@ -245,6 +345,14 @@
             animation: neon 1.5s infinite alternate;
         }
 
+        .start-screen p {
+            color: #0df;
+            font-size: 18px;
+            margin: 5px 0;
+            text-shadow: 0 0 5px #0df;
+            text-align: center;
+        }
+
         .start-screen button {
             background-color: transparent;
             border: 2px solid #0df;
@@ -277,22 +385,34 @@
     <div class="game-container">
         <div class="glitch-overlay"></div>
         <div id="game-board"></div>
-        <div class="score-container">分数: <span id="score">0</span></div>
+        <div class="score-container">KPI: <span id="score">0</span></div>
+        <div class="salary-container">工资: ¥<span id="salary">3000</span></div>
+        <div class="status-container">状态: <span id="status">实习生</span></div>
+        <div class="message" id="message"></div>
         <div class="controls">
             方向键或WASD控制<br>
             空格键暂停
         </div>
         <div class="game-over">
-            <h2>游戏结束</h2>
-            <p>最终分数: <span id="final-score">0</span></p>
-            <button id="restart-button">重新开始</button>
+            <h2>打工结束</h2>
+            <p>最终KPI: <span id="final-score">0</span></p>
+            <p>最终工资: ¥<span id="final-salary">3000</span></p>
+            <p>职场评价: <span id="final-status">普通打工人</span></p>
+            <button id="restart-button">重新入职</button>
         </div>
         <div class="celebration"></div>
+        <div class="event-overlay" id="event-overlay">
+            <h3 id="event-title">职场事件</h3>
+            <p id="event-description">描述</p>
+            <button id="event-button">继续</button>
+        </div>
         <div class="start-screen">
-            <h1>赛博贪吃蛇</h1>
+            <h1>赛博打工蛇</h1>
             <p>使用方向键或WASD控制蛇的移动</p>
-            <p>空格键暂停游戏</p>
-            <button id="start-button">开始游戏</button>
+            <p>吃掉工作任务(粉色圆点)提高KPI</p>
+            <p>吃掉工资红包(红色方块)增加工资</p>
+            <p>小心职场陷阱和加班！</p>
+            <button id="start-button">开始打工</button>
         </div>
     </div>
 
@@ -304,16 +424,25 @@
                 cellSize: 20, // 每个格子20px
                 initialSpeed: 150, // 初始速度，毫秒
                 speedIncrease: 2, // 每吃一个食物加快的毫秒数
-                minSpeed: 50 // 最小速度限制
+                minSpeed: 50, // 最小速度限制
+                bonusFoodChance: 0.2, // 工资红包出现概率
+                eventChance: 0.1 // 职场事件触发概率
             };
 
             // 游戏状态
             let snake = [];
             let food = {};
+            let bonusFood = null; // 工资红包
             let direction = 'right';
             let nextDirection = 'right';
             let score = 0;
+            let salary = 3000; // 初始工资
+            let status = '实习生'; // 职场状态
             let gameInterval;
+            let bonusFoodTimeout;
+            let isPaused = false
+
+            // 游戏状态变量
             let isPaused = false;
             let gameStarted = false;
             let gameSpeed = config.initialSpeed;
@@ -321,265 +450,23 @@
             // DOM元素
             const gameBoard = document.getElementById('game-board');
             const scoreElement = document.getElementById('score');
+            const salaryElement = document.getElementById('salary');
+            const statusElement = document.getElementById('status');
+            const messageElement = document.getElementById('message');
             const finalScoreElement = document.getElementById('final-score');
+            const finalSalaryElement = document.getElementById('final-salary');
+            const finalStatusElement = document.getElementById('final-status');
             const gameOverScreen = document.querySelector('.game-over');
             const restartButton = document.getElementById('restart-button');
             const startButton = document.getElementById('start-button');
             const startScreen = document.querySelector('.start-screen');
             const celebrationElement = document.querySelector('.celebration');
+            const eventOverlay = document.getElementById('event-overlay');
+            const eventTitle = document.getElementById('event-title');
+            const eventDescription = document.getElementById('event-description');
+            const eventButton = document.getElementById('event-button');
 
-            // 创建网格线
-            function createGrid() {
-                // 创建水平线
-                for (let i = 0; i <= config.boardSize; i++) {
-                    const horizontalLine = document.createElement('div');
-                    horizontalLine.className = 'grid-line horizontal';
-                    horizontalLine.style.top = `${i * config.cellSize}px`;
-                    gameBoard.appendChild(horizontalLine);
-                }
-
-                // 创建垂直线
-                for (let i = 0; i <= config.boardSize; i++) {
-                    const verticalLine = document.createElement('div');
-                    verticalLine.className = 'grid-line vertical';
-                    verticalLine.style.left = `${i * config.cellSize}px`;
-                    gameBoard.appendChild(verticalLine);
-                }
-            }
-
-            // 初始化游戏
-            function initGame() {
-                // 清空游戏板
-                gameBoard.innerHTML = '';
-                createGrid();
-
-                // 初始化蛇
-                snake = [
-                    { x: 10, y: 15 },
-                    { x: 9, y: 15 },
-                    { x: 8, y: 15 }
-                ];
-
-                // 重置游戏状态
-                direction = 'right';
-                nextDirection = 'right';
-                score = 0;
-                gameSpeed = config.initialSpeed;
-                scoreElement.textContent = score;
-                
-                // 生成食物
-                generateFood();
-                
-                // 绘制蛇和食物
-                drawSnake();
-                drawFood();
-                
-                // 开始游戏循环
-                if (gameInterval) clearInterval(gameInterval);
-                gameInterval = setInterval(gameLoop, gameSpeed);
-            }
-
-            // 游戏主循环
-            function gameLoop() {
-                if (isPaused) return;
-                
-                // 更新方向
-                direction = nextDirection;
-                
-                // 移动蛇
-                moveSnake();
-                
-                // 检查碰撞
-                if (checkCollision()) {
-                    gameOver();
-                    return;
-                }
-                
-                // 检查是否吃到食物
-                if (snake[0].x === food.x && snake[0].y === food.y) {
-                    eatFood();
-                } else {
-                    // 如果没吃到食物，移除尾部
-                    snake.pop();
-                }
-                
-                // 重新绘制
-                drawSnake();
-            }
-
-            // 移动蛇
-            function moveSnake() {
-                const head = { ...snake[0] };
-                
-                switch (direction) {
-                    case 'up':
-                        head.y--;
-                        break;
-                    case 'down':
-                        head.y++;
-                        break;
-                    case 'left':
-                        head.x--;
-                        break;
-                    case 'right':
-                        head.x++;
-                        break;
-                }
-                
-                // 添加新的头部
-                snake.unshift(head);
-            }
-
-            // 检查碰撞
-            function checkCollision() {
-                const head = snake[0];
-                
-                // 检查墙壁碰撞
-                if (head.x < 0 || head.x >= config.boardSize || head.y < 0 || head.y >= config.boardSize) {
-                    return true;
-                }
-                
-                // 检查自身碰撞 (从第二个身体部分开始检查)
-                for (let i = 1; i < snake.length; i++) {
-                    if (head.x === snake[i].x && head.y === snake[i].y) {
-                        return true;
-                    }
-                }
-                
-                return false;
-            }
-
-            // 吃食物
-            function eatFood() {
-                // 增加分数
-                score++;
-                scoreElement.textContent = score;
-                
-                // 每5分显示庆祝效果
-                if (score % 5 === 0) {
-                    showCelebration();
-                }
-                
-                // 加速游戏
-                if (gameSpeed > config.minSpeed) {
-                    gameSpeed -= config.speedIncrease;
-                    clearInterval(gameInterval);
-                    gameInterval = setInterval(gameLoop, gameSpeed);
-                }
-                
-                // 生成新食物
-                generateFood();
-            }
-
-            // 生成食物
-            function generateFood() {
-                // 随机生成食物位置
-                let foodPosition;
-                do {
-                    foodPosition = {
-                        x: Math.floor(Math.random() * config.boardSize),
-                        y: Math.floor(Math.random() * config.boardSize)
-                    };
-                    
-                    // 确保食物不会生成在蛇身上
-                    var onSnake = false;
-                    for (let i = 0; i < snake.length; i++) {
-                        if (snake[i].x === foodPosition.x && snake[i].y === foodPosition.y) {
-                            onSnake = true;
-                            break;
-                        }
-                    }
-                } while (onSnake);
-                
-                food = foodPosition;
-                drawFood();
-            }
-
-            // 绘制蛇
-            function drawSnake() {
-                // 移除旧的蛇身
-                const oldSnakeParts = document.querySelectorAll('.snake-part');
-                oldSnakeParts.forEach(part => part.remove());
-                
-                // 绘制新的蛇身
-                snake.forEach((part, index) => {
-                    const snakePart = document.createElement('div');
-                    snakePart.className = 'snake-part';
-                    if (index === 0) {
-                        snakePart.classList.add('snake-head');
-                    }
-                    snakePart.style.left = `${part.x * config.cellSize}px`;
-                    snakePart.style.top = `${part.y * config.cellSize}px`;
-                    gameBoard.appendChild(snakePart);
-                });
-            }
-
-            // 绘制食物
-            function drawFood() {
-                // 移除旧的食物
-                const oldFood = document.querySelector('.food');
-                if (oldFood) {
-                    oldFood.remove();
-                }
-                
-                // 绘制新的食物
-                const foodElement = document.createElement('div');
-                foodElement.className = 'food';
-                foodElement.style.left = `${food.x * config.cellSize}px`;
-                foodElement.style.top = `${food.y * config.cellSize}px`;
-                gameBoard.appendChild(foodElement);
-            }
-
-            // 游戏结束
-            function gameOver() {
-                clearInterval(gameInterval);
-                finalScoreElement.textContent = score;
-                gameOverScreen.style.display = 'flex';
-            }
-
-            // 显示庆祝效果
-            function showCelebration() {
-                celebrationElement.style.display = 'block';
-                celebrationElement.innerHTML = '';
-                
-                // 创建粒子效果
-                for (let i = 0; i < 50; i++) {
-                    const particle = document.createElement('div');
-                    particle.className = 'particle';
-                    
-                    // 随机颜色
-                    const colors = ['#0df', '#ff00ff', '#ff0080'];
-                    const color = colors[Math.floor(Math.random() * colors.length)];
-                    particle.style.backgroundColor = color;
-                    particle.style.boxShadow = `0 0 10px ${color}`;
-                    
-                    // 随机位置
-                    const x = Math.random() * 600;
-                    const y = Math.random() * 600;
-                    particle.style.left = `${x}px`;
-                    particle.style.top = `${y}px`;
-                    
-                    // 随机移动方向
-                    const tx = (Math.random() - 0.5) * 400;
-                    const ty = (Math.random() - 0.5) * 400;
-                    particle.style.setProperty('--tx', `${tx}px`);
-                    particle.style.setProperty('--ty', `${ty}px`);
-                    
-                    celebrationElement.appendChild(particle);
-                }
-                
-                // 1.5秒后隐藏庆祝效果
-                setTimeout(() => {
-                    celebrationElement.style.display = 'none';
-                }, 1500);
-            }
-
-            // 暂停/继续游戏
-            function togglePause() {
-                isPaused = !isPaused;
-            }
-
-            // 事件监听器
+            // 事件监听器设置
             function setupEventListeners() {
                 // 开始按钮
                 startButton.addEventListener('click', () => {
@@ -634,7 +521,22 @@
                 });
             }
 
-            // 初始化
+            // 暂停/继续游戏
+            function togglePause() {
+                isPaused = !isPaused;
+                showMessage(isPaused ? "游戏暂停" : "游戏继续");
+            }
+
+            // 显示消息
+            function showMessage(text) {
+                messageElement.textContent = text;
+                messageElement.style.opacity = '1';
+                setTimeout(() => {
+                    messageElement.style.opacity = '0';
+                }, 2000);
+            }
+
+            // 初始化游戏
             setupEventListeners();
         });
     </script>
